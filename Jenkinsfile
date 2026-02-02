@@ -24,7 +24,7 @@ pipeline {
                         env.ENV = 'prod'
                         env.NAMESPACE = 'production'
                     } else {
-                        error "Unsupported branch"
+                        error "Unsupported branch: ${env.BRANCH_NAME}"
                     }
 
                     env.TAG = "${ENV}-${BUILD_NUMBER}"
@@ -54,10 +54,10 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh """
-                sed -i 's|IMAGE_BACKEND|$DOCKERHUB_USER/$BACKEND_IMAGE:$TAG|g' k8s/level-1-basic/${ENV}/backend-deployment.yaml
-                sed -i 's|IMAGE_FRONTEND|$DOCKERHUB_USER/$FRONTEND_IMAGE:$TAG|g' k8s/level-1-basic/${ENV}/frontend-deployment.yaml
+                sed -i 's|IMAGE_BACKEND|$DOCKERHUB_USER/$BACKEND_IMAGE:$TAG|g' k8s/level-1-basic/backend-deployment.yaml
+                sed -i 's|IMAGE_FRONTEND|$DOCKERHUB_USER/$FRONTEND_IMAGE:$TAG|g' k8s/level-1-basic/frontend-deployment.yaml
 
-                kubectl apply -n $NAMESPACE -f k8s/level-1-basic/${ENV}/
+                kubectl apply -n $NAMESPACE -f k8s/level-1-basic/
                 """
             }
         }
@@ -65,7 +65,7 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment successful to ${NAMESPACE}"
+            echo "✅ Deployment successful to namespace: ${NAMESPACE}"
         }
         failure {
             echo "❌ Deployment failed"
